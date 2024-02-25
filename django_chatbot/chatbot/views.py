@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 import openai
+import elevenlabs
 
-openai_api_key = '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'
+openai_api_key = '****'
 openai.api_key = openai_api_key
 
 def ask_openai(message):
@@ -24,4 +25,27 @@ def chatbot(request):
         response = ask_openai(message)
         return JsonResponse({'message': message, 'response': response})
     return render(request, 'chatbot.html')
+
+
+def pronunciation(request):
+    if request.method == 'POST':
+        elevenlabs.set_api_key("****")
+        voice = elevenlabs.Voice(
+            voice_id="ZQe5CZNOzWyzPSCn5a3c",
+            settings=elevenlabs.VoiceSettings(
+                stability=0,
+                similarity_boost=0.75
+            )
+        )
+
+        response_text = request.POST.get('response')
+        
+        audio = elevenlabs.generate(
+            text=response_text,
+            voice=voice
+        )
+        elevenlabs.play(audio)
+
+    return JsonResponse({'status': 'success'})
+
 
